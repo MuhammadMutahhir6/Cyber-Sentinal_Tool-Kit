@@ -1,0 +1,52 @@
+[Sun Oct 06 01:49:33 2024
+] Displayed intro
+[Sun Oct 06 01:56:11 2024
+] Displayed intro
+[Sun Oct 06 01:56:30 2024
+] Login successful
+[Sun Oct 06 01:56:30 2024
+] Displayed tools menu
+[Sun Oct 06 01:56:51 2024
+] Brute Force Attack Simulator executed
+[Sun Oct 06 01:56:58 2024
+] Displayed tools menu
+[Sun Oct 06 01:58:36 2024
+] Displayed tools menu
+[Sun Oct 06 01:59:14 2024
+] Displayed tools menu
+[Sun Oct 06 02:01:16 2024
+] Program exited
+[Sun Oct 06 02:01:37 2024
+] Displayed intro
+[Sun Oct 06 02:01:46 2024
+] Login successful
+[Sun Oct 06 02:01:46 2024
+] Displayed tools menu
+[Sun Oct 06 02:03:38 2024
+] Displayed intro
+[Sun Oct 06 02:03:43 2024
+] Login successful
+[Sun Oct 06 02:03:43 2024
+] Displayed tools menu
+[Sun Oct 06 02:04:12 2024
+] Displayed tools menu
+[Sun Oct 06 14:56:19 2024] Displayed intro
+[Sun Oct 06 14:56:29 2024] Login successful
+[Sun Oct 06 14:56:29 2024] Displayed tools menu
+[Sun Oct 06 15:02:17 2024
+] Displayed intro
+[Sun Oct 06 15:02:22 2024
+] Login successful
+[Sun Oct 06 15:02:22 2024
+] Displayed tools menu
+[Sun Oct 06 15:02:32 2024
+] Password Generator executed
+[Sun Oct 06 15:02:43 2024
+] Displayed tools menu
+[Sun Oct 06 15:04:07 2024] Displayed intro
+[Mon Oct 07 12:00:55 2024
+] Displayed intro
+[Mon Oct 07 12:02:39 2024
+] Displayed intro
+[Mon Oct 07 19:01:32 2024
+] Displayed intro
