@@ -1,6 +1,5 @@
 # 🛡️ Cyber Sentinel Tool Kit 🛡️
 
-![Security](https://via.placeholder.com/100) ![Password Protection](https://via.placeholder.com/100) ![Encryption](https://via.placeholder.com/100)
 
 **Cyber Sentinel Tool Kit** is a comprehensive suite of cybersecurity tools designed to protect digital environments from various threats. Whether you're a security enthusiast or IT professional, these tools help enhance password security, simulate attacks, manage sensitive data securely, and more.
 
