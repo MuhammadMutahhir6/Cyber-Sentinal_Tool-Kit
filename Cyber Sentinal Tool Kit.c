@@ -1,614 +1,1020 @@
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <windows.h>
-#include <stdlib.h>
-#include <unistd.h>  // For sleep and usleep functions
+#include <stdio.h>          // Standard input/output library for functions like printf, scanf
+#include <string.h>         // String manipulation functions like strcmp, strcpy
+#include <time.h>           // Time-related functions for logging timestamps
+#include <stdlib.h>         // Standard library functions for memory allocation, process control
+#include <unistd.h>         // UNIX standard functions for sleep and usleep
+#include <ctype.h>          // Character type functions like tolower, isalpha, isdigit
+#include <math.h>
 
-// ANSI Color Codes for terminal output
-#define RESET   "\033[0m"
-#define RED     "\033[0;31m"
-#define GREEN   "\033[0;32m"
-#define YELLOW  "\033[0;33m"
-#define BLUE    "\033[0;34m"
-#define CYAN    "\033[0;36m"
-#define BOLD    "\033[1m"
-#define UNDERLINE "\033[4m"
+// ANSI Color Codes for terminal output (used to add colors and text styles)
+#define RESET     "\033[0m"      // Resets all attributes
+#define RED       "\033[0;31m"   // Red text
+#define GREEN     "\033[0;32m"   // Green text
+#define YELLOW    "\033[0;33m"   // Yellow text
+#define BLUE      "\033[0;34m"   // Blue text
+#define CYAN      "\033[0;36m"   // Cyan text
+#define MAGENTA   "\033[0;35m"   // Magenta text
+#define BOLD      "\033[1m"       // Bold text
+#define UNDERLINE "\033[4m"       // Underlined text
+#define BOLD_RED "\033[1;31m" // Bold red text
 
-// Define MAX_ATTEMPTS and LOCKOUT_TIME for login system
-#define MAX_ATTEMPTS 3
-#define LOCKOUT_TIME 10
-#define MAX_WORD_LENGTH 100
+// Define constants for login system and file paths
+#define MAX_ATTEMPTS 3             // Maximum number of login attempts
+#define LOCKOUT_TIME 10            // Lockout duration in seconds after max attempts
+#define MAX_WORD_LENGTH 100        // Maximum length for password inputs
+#define FEEDBACK_FILE "feedback.txt" // File to store user feedback
 
-// Function to log actions to a file
-void log_action(const char *action) {
-    FILE *log_file = fopen("program_log.txt", "a");
-    if (log_file) {
-        time_t current_time = time(NULL);
-        fprintf(log_file, "[%s] %s\n", ctime(&current_time), action);
-        fclose(log_file);
-    }
+// Function to load settings from file (Removed theme-related settings)
+void load_settings() {
+    // No settings to load since themes are removed
 }
 
-// Utility Functions
+// Function to save settings to file (Removed theme-related settings)
+void save_settings() {
+    // No settings to save since themes are removed
+}
+
+// Utility function to clear the terminal screen
 void clear_screen() {
-    printf("\033[2J\033[H");
+    printf("\033[2J\033[H"); // ANSI escape codes to clear screen and move cursor to home position
 }
 
+// Fixed color definitions for message types using previously defined ANSI codes
+#define SUCCESS GREEN    // Success messages will be in green
+#define ERROR RED        // Error messages will be in red
+#define WARNING YELLOW   // Warning messages will be in yellow
+#define INFO BLUE        // Informational messages will be in blue
+
+// Function to display the introductory information with group and university details
 void display_intro() {
+    // Define color codes for a professional appearance
+    const char *COLOR_BLUE   = "\033[34m"; // Blue
+    const char *COLOR_WHITE  = "\033[37m"; // White
+    const char *COLOR_GRAY   = "\033[90m"; // Bright Black (Gray)
+    const char *COLOR_GREEN  = "\033[32m"; // Green
+    const char *COLOR_RESET  = "\033[0m";  // Reset to default
+
+    const int terminal_width = 80; // Set terminal width for centering
+
+    // Header content
+    const char *header[] = {
+        "  ===============================================  ",
+        " ||                                             || ",
+        " ||            WELCOME TO OUR PROGRAM           || ",
+        " ||                                             || ",
+        "  ===============================================  "
+    };
+    const int header_lines = sizeof(header) / sizeof(header[0]);
+    const int delay = 150000; // Delay between lines (0.15 seconds)
+
+    // Clear the terminal screen
     clear_screen();
-    printf(GREEN "=====================================\n" RESET);
-    printf(CYAN "University Name: " GREEN "Fast Nuces\n" RESET);
-    printf(CYAN "Subject: " GREEN "Programming Fundamentals\n" RESET);
-    printf(CYAN "Teacher Name: " GREEN "Noman Hanif\n" RESET);
-    printf(GREEN "=====================================\n" RESET);
-    printf(CYAN "Group Members:\n" RESET);
-    printf(CYAN "Hasnain Memon   (24k-2001)\n" RESET);
-    printf(CYAN "Muhammad Mutahir (24k-2005)\n" RESET);
-    printf(GREEN "=====================================\n" RESET);
-    printf("\n\nPress ENTER to continue...");
-    getchar();  // Wait for user to press Enter
-    log_action("Displayed intro");
-}
 
-void display_banner() {
-    printf(GREEN "=====================================\n" RESET);
-    printf(CYAN  "      All-in-One Kali Linux Tools    \n" RESET);
-    printf(GREEN "=====================================\n" RESET);
-}
-
-void loading_animation() {
-    for (int i = 0; i < 3; i++) {
-        printf(GREEN "." RESET);
+    // Display header with animation
+    for (int i = 0; i < header_lines; i++) {
+        // Calculate padding for horizontal centering
+        int padding = (terminal_width - strlen(header[i])) / 2;
+        // Determine color based on line index
+        const char *color = (i == 0 || i == header_lines - 1) ? COLOR_GRAY : COLOR_BLUE;
+        // Print each line with the assigned color and padding
+        printf("%s%*s%s%s\n", 
+            color,          // Apply assigned color
+            padding, "",    // Center horizontally with padding
+            header[i], 
+            COLOR_RESET    // Reset color after the line
+        );
         fflush(stdout);
-        usleep(500000);  // 0.5 seconds delay
+        usleep(delay);
     }
+
+    // Pause after the header animation
+    usleep(500000);
+
+    // Centered university and subject details
+     printf("\n");
+    printf("%*s%s+-----------------------------------------------+%s\n", 
+           (terminal_width - 49) / 2, "", COLOR_GRAY, COLOR_RESET);
+    printf("%*s| %sUniversity Name:%s  %sFast Nuces                  %s|\n", 
+           (terminal_width - 49) / 2, "",
+           COLOR_WHITE, COLOR_RESET,
+           COLOR_GREEN, COLOR_GRAY);
+    printf("%*s| %sSubject:%s          %sProgramming Fundamentals    %s|\n", 
+           (terminal_width - 49) / 2, "",
+           COLOR_WHITE, COLOR_RESET,
+           COLOR_GREEN, COLOR_GRAY);
+    printf("%*s| %sTeacher Name:%s     %sNoman Hanif                 %s|\n", 
+           (terminal_width - 49) / 2, "",
+           COLOR_WHITE, COLOR_RESET,
+           COLOR_GREEN, COLOR_GRAY);
+    printf("%*s| %sSection:%s          %sBCY-1A                      %s|\n", 
+           (terminal_width - 49) / 2, "",
+           COLOR_WHITE, COLOR_RESET,
+           COLOR_GREEN, COLOR_GRAY);
+    printf("%*s%s+-----------------------------------------------+%s\n", 
+           (terminal_width - 49) / 2, "", COLOR_GRAY, COLOR_RESET);
+
+    // Pause before displaying group members
+    usleep(500000);
+
+    // Centered group members
     printf("\n");
+    printf("%*s%s+-----------------------------------------------+%s\n", 
+           (terminal_width - 49) / 2, "", COLOR_GRAY, COLOR_RESET);
+    printf("%*s| %sGroup Members:%s                                %s|\n", 
+           (terminal_width - 49) / 2, "",
+           COLOR_WHITE, COLOR_RESET,
+           COLOR_GRAY);
+    printf("%*s|                                               |\n", 
+           (terminal_width - 49) / 2, "");
+    printf("%*s| %sHasnain Memon%s    %s(24k-2001)%s                   %s|\n", 
+           (terminal_width - 49) / 2, "",
+           COLOR_GREEN, COLOR_RESET,
+           COLOR_WHITE, COLOR_RESET,
+           COLOR_GRAY);
+    fflush(stdout);
+    usleep(delay);
+    printf("%*s| %sMuhammad Mutahir%s %s(24k-2005)%s                   %s|\n", 
+           (terminal_width - 49) / 2, "",
+           COLOR_GREEN, COLOR_RESET,
+           COLOR_WHITE, COLOR_RESET,
+           COLOR_GRAY);
+    printf("%*s%s+-----------------------------------------------+%s\n", 
+           (terminal_width - 49) / 2, "", COLOR_GRAY, COLOR_RESET);
+
+    // Pause before exit prompt
+    usleep(500000);
+
+    // Centered prompt to continue
+    printf("\n");
+    printf("%*s%sPress ENTER to continue...%s\n", 
+           (terminal_width - 26) / 2, "", 
+           COLOR_WHITE, COLOR_RESET);
+    getchar(); // Wait for user to press Enter
 }
 
-// Login Functions
+// Function to display the ASCII art banner for the program
+void display_banner() {
+    const char *ascii_art[] = {
+        "   ____      _               ____             _   _            _ ",
+        "  / ___|   _| |__   ___ _ __/ ___|  ___ _ __ | |_(_)_ __   ___| |",
+        " | |  | | | | '_ \\ / _ \\ '__\\___ \\ / _ \\ '_ \\| __| | '_ \\ / _ \\ |",
+        " | |__| |_| | |_) |  __/ |   ___) |  __/ | | | |_| | | | |  __/ |",
+        "  \\____\\__, |_.__/_\\___|_|  |____/ \\___|_| |_|\\__|_|_| |_|\\___|_|",
+        "       |___/    |_   _|__   ___ | | |/ (_) |_                    ",
+        "                  | |/ _ \\ / _ \\| | ' /| | __|                   ",
+        "                  | | (_) | (_) | | . \\| | |_                     ",
+        "                  |_|\\___/ \\___/|_|_|\\_\\_|\\__|    ",
+    };
+
+    // Professional and consistent color palette
+    const char *colors[] = {
+        "\033[34m", // Blue
+        "\033[37m", // White
+        "\033[90m", // Bright Black (Gray)
+        "\033[36m", // Cyan
+        "\033[32m"  // Green
+    };
+
+    int num_lines = sizeof(ascii_art) / sizeof(ascii_art[0]);
+    int delay = 150000; // Delay between lines (0.15 seconds)
+    int color_count = sizeof(colors) / sizeof(colors[0]);
+
+    // Clear screen and move cursor to top-left
+    printf("\033[2J\033[H");
+
+    // Add vertical spacing for centering
+    printf("\n\n\n");
+
+    for (int i = 0; i < num_lines; i++) {
+        // Apply professional color gradient
+        printf("%s%*s%s%s\n", 
+            colors[i % color_count], // Cycle through professional colors
+            20, "",                   // Center horizontally with 20 spaces
+            ascii_art[i], 
+            "\033[0m");               // Reset color after each line
+        fflush(stdout);               // Flush the output buffer
+        usleep(delay);                // Delay for animation
+    }
+
+    // Footer styling with consistent color
+    printf("\033[37m"); // White text for footer
+    printf("\n%*s==========================================================================\n", 10, "");
+    printf("  \033[32m%*sWelcome to the Program! Enjoy the Experience!\033[0m\n", 20, ""); // Footer message with green color
+
+    usleep(700000); // Pause for a moment before finishing
+    printf("\033[0m"); // Reset text attributes
+}
+
+// Function to display a progress bar in the terminal
+void show_progress_bar(int percentage) {
+    int width = 50; // Total width of the progress bar
+    int pos = (percentage * width) / 100; // Calculate position of the progress
+    printf("["); // Start of progress bar
+    for (int i = 0; i < width; ++i) { // Loop to fill the progress bar
+        if (i < pos) printf("=");      // Filled part
+        else if (i == pos) printf(">"); // Current position
+        else printf(" ");               // Unfilled part
+    }
+    printf("] %d%%\r", percentage); // End of progress bar with percentage
+    fflush(stdout); // Flush the output buffer to display immediately
+}
+
+// Function to display a spinner animation in the terminal
+void show_spinner() {
+    const char spinner_chars[] = {'|', '/', '-', '\\'}; // Spinner characters
+    static int spinner_index = 0; // Static index to keep track of spinner state
+    printf("%c", spinner_chars[spinner_index]); // Display current spinner character
+    fflush(stdout); // Flush the output buffer to display immediately
+    spinner_index = (spinner_index + 1) % 4; // Update spinner index cyclically
+}
+
+// Confirmation prompt function to confirm critical actions
+int confirm_action_prompt(const char *action) {
+    char response[10]; // Buffer to store user response
+    // Prompt the user with a warning message
+    printf("%s%sWARNING%s: Are you sure you want to %s? (y/n): ", WARNING, BOLD, RESET, action);
+    scanf("%s", response); // Read user input
+    // Clear input buffer to remove any remaining characters
+    while (getchar() != '\n');
+    if (tolower(response[0]) == 'y') { // Check if response starts with 'y' or 'Y'
+        return 1; // User confirmed
+    }
+    return 0; // User did not confirm
+}
+
+// Function to play a beep sound using ASCII Bell character
+void play_beep() {
+    printf("\a"); // ASCII Bell character
+    fflush(stdout); // Flush the output buffer to ensure the beep is played
+}
+
+// Function to display the help section with instructions
+void display_help() {
+    clear_screen(); // Clear the terminal screen
+
+    const int padding = 20; // Center alignment for the box
+
+    // Display help header
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+    printf("%s%*s|                  %sHelp Section%s                  %s|\n", 
+           CYAN, padding, "", BOLD, RESET, CYAN);
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+
+    // Display help instructions
+    printf("%*s| %-48s|\n", padding, "", "1. Select a tool by entering its number.");
+    printf("%*s| %-48s|\n", padding, "", "2. Follow the on-screen prompts.");
+    printf("%*s| %-48s|\n", padding, "", "3. Refer to documentation for issues.");
+    printf("%*s| %-48s|\n", padding, "", "4. To exit, select 'Exit' from the menu.");
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+
+    // Prompt to return to the main menu
+    printf("\n");
+    printf("%*s\033[1;33mPress ENTER to return to the main menu...\033[0m\n", 
+           (80 - 42) / 2, ""); // Center the prompt
+    getchar(); // Wait for user to press Enter
+}
+
+// Function to get a valid menu choice from the user with input validation
+int get_valid_choice(int min, int max) {
+    int choice; // Variable to store user's choice
+    int attempts = 0; // Counter for user attempts
+
+    while (1) { // Infinite loop until a valid choice is entered
+        // Display prompt
+        printf("\n");
+        printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+        printf("%s%*s| %sChoose an option (%d-%d):%s                     %s|\n", 
+               CYAN, 20, "", BOLD, min, max, RESET, CYAN);
+        printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+
+        if (scanf("%d", &choice) != 1) { // Input validation: Check if integer
+            while (getchar() != '\n'); // Clear buffer
+            printf("%s%*s| %s[ERROR]%s Invalid input! Please enter a valid number. %s|\n", 
+                   BOLD_RED, 20, "", BOLD_RED, RESET, CYAN);
+            printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+            attempts++;
+            continue; // Restart loop
+        }
+
+        if (choice < min || choice > max) { // Range validation
+            printf("%s%*s| %s[ERROR]%s Choice out of range! Enter a number (%d-%d). %s|\n", 
+                   BOLD_RED, 20, "", BOLD_RED, RESET, min, max, CYAN);
+            printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+            attempts++;
+        } else {
+            while (getchar() != '\n'); // Clear buffer
+            break; // Valid input, exit loop
+        }
+    }
+
+    // Display success message and return choice
+    printf("%s%*s| %s[INFO]%s You selected option %d after %d attempt(s).%s        %s|\n", 
+           CYAN, 20, "", CYAN, RESET, choice, attempts, RESET, CYAN);
+    printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+    return choice;
+}
+
+// Function to get user input with a prompt and an optional example
+void get_input(char *buffer, size_t size, const char *prompt, const char *example) {
+    printf("%s%s%s", INFO, prompt, RESET); // Print the prompt with informational color
+    if (example != NULL && strlen(example) > 0) { // If an example is provided
+        printf(" (%s): ", example); // Print the example
+    } else {
+        printf(": "); // Otherwise, just print a colon
+    }
+    if (fgets(buffer, size, stdin) != NULL) { // Read user input safely
+        buffer[strcspn(buffer, "\n")] = '\0'; // Remove the newline character from input
+    } else {
+        buffer[0] = '\0'; // Set buffer to empty string if input fails
+    }
+}
+
+// Function to display a user-friendly exit message and collect feedback
+void user_exit() {
+    clear_screen(); // Clear the terminal screen
+
+    const int padding = 20; // Center alignment for the box
+
+    // Display exit message
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+    printf("%s%*s|                                                  |\n", GREEN, padding, "");
+    printf("%s%*s|   %sThank you for using the program! Goodbye!%s      %s|\n", 
+           GREEN, padding, "", BOLD, RESET, GREEN);
+    printf("%s%*s|                                                  |\n", GREEN, padding, "");
+    printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+
+    // Prompt for feedback
+    printf("\n");
+    printf("%*sWould you like to provide feedback? (y/n): ", (80 - 42) / 2, "");
+    char response[10]; // Buffer to store user response
+    scanf("%s", response); // Read user input
+
+    // Clear input buffer to remove any remaining characters
+    while (getchar() != '\n');
+
+    if (tolower(response[0]) == 'y') { // Check if response starts with 'y' or 'Y'
+        char feedback[512]; // Buffer to store user feedback
+
+        // Get user feedback with a centered prompt
+        get_input(feedback, sizeof(feedback), 
+                  "\033[1;33mEnter your feedback:", "e.g., The program is very useful");
+
+        FILE *fb = fopen(FEEDBACK_FILE, "a"); // Open feedback file in append mode
+        if (fb) { // Check if file opened successfully
+            time_t current_time = time(NULL); // Get current time
+            char *time_str = ctime(&current_time); // Convert time to string
+            time_str[strcspn(time_str, "\n")] = 0; // Remove newline
+            fprintf(fb, "[%s] %s\n", time_str, feedback); // Write feedback with timestamp
+            fclose(fb); // Close the feedback file
+
+            // Print success message
+            printf("\n");
+            printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+            printf("%s%*s|   %sSUCCESS:%s Thank you for your feedback!            %s|\n", 
+                   GREEN, padding, "", BOLD, RESET, GREEN);
+            printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+        } else { // If feedback file couldn't be opened
+            printf("\n");
+            printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+            printf("%s%*s|   %sERROR:%s Unable to save feedback.                  %s|\n", 
+                   ERROR, padding, "", BOLD, RESET, ERROR);
+            printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        }
+    }
+
+    printf("\n");
+    exit(0); // Terminate the program
+}
+
+// Function to check if the entered password matches the correct password
 int check_password(const char *input_password) {
-    const char *correct_password = "password123";
-    return strcmp(input_password, correct_password) == 0;
+    const char *correct_password = " "; // Define the correct password
+    return strcmp(input_password, correct_password) == 0; // Return 1 if passwords match, else 0
 }
 
+// Function to display the login header
 void display_header() {
-    printf(GREEN "====================================================\n" RESET);
-    printf(CYAN "         Welcome to the Secure Login System         \n" RESET);
-    printf(GREEN "====================================================\n" RESET);
+    // Define color codes for a professional appearance
+    const char *COLOR_BLUE        = "\033[34m";  // Blue
+    const char *COLOR_BOLD_BLUE   = "\033[1;34m"; // Bold Blue
+    const char *COLOR_GRAY        = "\033[90m";  // Bright Black (Gray)
+    const char *COLOR_RESET       = "\033[0m";   // Reset to default
+
+    const int padding = 20; // Center alignment for header
+
+    // Header box with animation
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+    printf("%s%*s|                                                  |%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+    printf("%s%*s|      %sWelcome to the Secure Login System%s          |%s\n", 
+           COLOR_GRAY, padding, "", COLOR_BOLD_BLUE, COLOR_RESET, COLOR_GRAY);
+    printf("%s%*s|                                                  |%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+    printf("%s%*s+--------------------------------------------------+%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
 }
 
 void display_success() {
+    // Define color codes for a professional appearance
+    const char *COLOR_BLUE        = "\033[34m";  // Blue
+    const char *COLOR_BOLD_BLUE   = "\033[1;34m"; // Bold Blue
+    const char *COLOR_WHITE       = "\033[37m";  // White
+    const char *COLOR_GRAY        = "\033[90m";  // Bright Black (Gray)
+    const char *COLOR_RESET       = "\033[0m";   // Reset to default
+
+    const int padding = 20; // Center alignment for the box
+
+    // Clear the terminal screen
     clear_screen();
-    printf(GREEN "====================================================\n" RESET);
-    printf(GREEN "              LOGIN SUCCESSFUL! WELCOME              \n" RESET);
-    printf(GREEN "====================================================\n" RESET);
-    loading_animation();
-    log_action("Login successful");
+
+    // Success message box with consistent color palette
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+    printf("%s%*s|                                                  |%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+    printf("%s%*s|       %sLOGIN SUCCESSFUL! WELCOME%s                  |%s\n", 
+           COLOR_GRAY, padding, "", COLOR_BOLD_BLUE, COLOR_RESET, COLOR_GRAY);
+    printf("%s%*s|                                                  |%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+    printf("%s%*s+--------------------------------------------------+%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+
+    // Animated transition indicating session loading
+    printf("\n");
+    printf("%s%*s| %sINFO%s: %sLoading your session", 
+           COLOR_GRAY, padding, "", COLOR_WHITE, COLOR_RESET, COLOR_BLUE);
+    fflush(stdout); // Flush the output buffer to display immediately
+
+    for (int i = 0; i < 3; i++) { // Loop to display dots
+        usleep(500000); // 0.5 seconds delay
+        printf(".");
+        fflush(stdout); // Flush to show the dots one by one
+    }
+    printf(" |\n"); // Close the info line
+    printf("%s%*s+--------------------------------------------------+%s\n", 
+           COLOR_GRAY, padding, "", COLOR_RESET);
+
+    sleep(1); // Additional delay before proceeding
 }
 
-// Main menu of tools
-void display_tools_menu() {
-    clear_screen();
-    display_banner();
-    printf(YELLOW "Select a tool to use:\n" RESET);
-    printf(CYAN "1. Brute Force Attack Simulator\n" RESET);
-    printf(CYAN "2. Basic File Encryption Tool\n" RESET);
-    printf(CYAN "3. Basic File Decryption Tool\n" RESET);
-    printf(CYAN "4. Dictionary Attack Tool\n" RESET);  // Updated Dictionary Tool
-    printf(CYAN "5. Password Generator\n" RESET);
-    printf(CYAN "6. Password Strength Checker\n" RESET);
-    printf(CYAN "7. HexSecure: Secure Your Files\n" RESET);
-    printf(CYAN "8. Secure File Eraser (Shredder)\n" RESET);
-    printf(CYAN "9. Binary File Creator (Virus Creator)\n" RESET);
-    printf(YELLOW "10. Exit\n" RESET);
-    printf(GREEN "\nChoose a tool (1-10): " RESET);
-    log_action("Displayed tools menu");
-}
-
+// Function to handle the login system with attempts and lockout mechanism
 void login_system() {
-    char password[100];
-    int attempts = 0;
-    time_t lockout_start;
+    char password[100];    // Buffer to store user-entered password
+    int attempts = 0;      // Counter for login attempts
+    time_t lockout_start;  // Variable to store lockout start time
 
-    clear_screen();
-    display_header();
+    const char *COLOR_ERROR = "\033[31m";  // Red
+    const char *COLOR_WARNING = "\033[33m"; // Yellow
+    const char *COLOR_SUCCESS = "\033[32m"; // Green
+    const char *COLOR_BOLD = "\033[1m";     // Bold
+    const char *COLOR_RESET = "\033[0m";    // Reset to default
 
-    while (1) {
-        if (attempts >= MAX_ATTEMPTS) {
-            time_t current_time = time(NULL);
-            int lockout_duration = (int)(current_time - lockout_start);
+    const int padding = 20; // Padding for center alignment
+    const int terminal_width = 80; // Approximate terminal width for alignment
 
-            if (lockout_duration < LOCKOUT_TIME) {
-                printf(RED "Too many failed attempts! You are locked out for %d seconds.\n" RESET, LOCKOUT_TIME - lockout_duration);
-                sleep(1);
-                continue;
-            } else {
-                printf(GREEN "Lockout period is over. You can try again.\n" RESET);
-                attempts = 0;
+    clear_screen();       // Clear the terminal screen
+    display_header();     // Display the login header
+
+    while (1) { // Infinite loop until successful login
+        if (attempts >= MAX_ATTEMPTS) { // Check if max attempts exceeded
+            time_t current_time = time(NULL); // Get current time
+            int lockout_duration = (int)(current_time - lockout_start); // Calculate lockout duration
+
+            if (lockout_duration < LOCKOUT_TIME) { // If still within lockout period
+                printf("\n%*s%sERROR%s: Too many failed attempts! Locked out for %d seconds.%s\n", 
+                       padding, "", COLOR_ERROR, COLOR_RESET, LOCKOUT_TIME - lockout_duration, COLOR_RESET);
+                sleep(1); // Wait for 1 second before the next attempt
+                continue; // Continue to the next iteration
+            } else { // If lockout period has ended
+                printf("\n%*s%sSUCCESS%s: Lockout period over. You can try again.%s\n",
+                       padding, "", COLOR_SUCCESS, COLOR_RESET, COLOR_RESET);
+                attempts = 0; // Reset the attempts counter
             }
         }
 
-        printf(BLUE "\nEnter your password: " RESET);
-        scanf("%s", password);
+        // Prompt the user to enter the password
+        printf("\n%*s%sEnter your password: %s", padding, "", COLOR_BOLD, COLOR_RESET);
+        get_input(password, sizeof(password), "", "");
 
-        if (check_password(password)) {
-            display_success();
-            break;
-        } else {
-            attempts++;
-            printf(YELLOW "Incorrect password! You have %d attempt(s) remaining.\n" RESET, MAX_ATTEMPTS - attempts);
-            if (attempts >= MAX_ATTEMPTS) {
-                printf(RED "Too many failed attempts! Locking out for %d seconds...\n" RESET, LOCKOUT_TIME);
-                lockout_start = time(NULL);
+        if (check_password(password)) { // Check if password is correct
+            printf("\n%*s%sSUCCESS%s: Access Granted! Welcome to the system.%s\n",
+                   padding, "", COLOR_SUCCESS, COLOR_RESET, COLOR_RESET);
+            display_success(); // Display success animation
+            break; // Exit the loop upon successful login
+        } else { // If password is incorrect
+            attempts++; // Increment the attempts counter
+            play_beep(); // Play a beep sound as feedback
+            printf("\n%*s%sWARNING%s: Incorrect password! %d attempt(s) remaining.%s\n",
+                   padding, "", COLOR_WARNING, COLOR_RESET, MAX_ATTEMPTS - attempts, COLOR_RESET);
+            if (attempts >= MAX_ATTEMPTS) { // If max attempts reached
+                printf("\n%*s%sERROR%s: Too many failed attempts! Locking out for %d seconds...%s\n",
+                       padding, "", COLOR_ERROR, COLOR_RESET, LOCKOUT_TIME, COLOR_RESET);
+                lockout_start = time(NULL); // Record the start time of lockout
             }
         }
     }
 }
 
-// Tool 1: Simple Brute Force Attack Simulator
+// Function to increment the password guess based on the given character set
 int increment_password(char *password, int max_length, const char *charset, int charset_size) {
-    int i = strlen(password) - 1;
+    int i = strlen(password) - 1; // Start from the last character of the current guess
 
-    while (i >= 0) {
-        int pos = strchr(charset, password[i]) - charset;
-        if (pos < charset_size - 1) {
-            password[i] = charset[pos + 1];
-            return 1;
-        } else {
-            password[i] = charset[0];
-            i--;
+    while (i >= 0) { // Loop until the first character
+        int pos = strchr(charset, password[i]) - charset; // Find the position of current character in charset
+        if (pos < charset_size - 1) { // If not the last character in charset
+            password[i] = charset[pos + 1]; // Increment the character
+            return 1; // Successful increment
+        } else { // If it's the last character in charset
+            password[i] = charset[0]; // Reset to first character
+            i--; // Move to the previous character
         }
     }
 
-    if (strlen(password) < max_length) {
-        memset(password, charset[0], strlen(password));
-        password[strlen(password)] = charset[0];
-        password[strlen(password) + 1] = '\0';
-        return 1;
+    if (strlen(password) < max_length) { // If current guess length is less than max_length
+        size_t len = strlen(password); // Get current length
+        memset(password, charset[0], len + 1); // Reset all characters to first charset character
+        password[len + 1] = '\0'; // Null-terminate the string
+        return 1; // Successful increment
     }
 
-    return 0;
+    return 0; // Failed to increment (max length reached)
 }
 
+// Function to simulate a brute-force attack on a target password
 void brute_force_simulator() {
-    clear_screen();
-    printf(GREEN "Brute Force Attack Simulator\n" RESET);
+    clear_screen(); // Clear the terminal screen
 
-    char target_password[100];
-    char charset[] = "abcdefghijklmnopqrstuvwxyz";
-    int charset_size = strlen(charset);
-    int max_length;
-    char guess[100] = "";
-    int attempts = 0;
-    clock_t start_time, end_time;
+    const int padding = 20; // Center alignment for the header and content
 
-    printf("\nEnter the target password (lowercase letters only): ");
-    scanf("%s", target_password);
-    printf("Enter the maximum password length to attempt: ");
-    scanf("%d", &max_length);
+    // Header for the simulator
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+    printf("%s%*s|     %sBrute Force Attack Simulator%s                 %s|\n", 
+           CYAN, padding, "", BOLD, RESET, CYAN);
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
 
-    guess[0] = charset[0];
-    guess[1] = '\0';
-    start_time = clock();
+    char target_password[100]; // Buffer to store the target password
+    char charset[] = "abcdefghijklmnopqrstuvwxyz"; // Character set to use for guessing
+    int charset_size = strlen(charset); // Size of the character set
+    int max_length; // Maximum password length to attempt
+    char guess[100] = ""; // Buffer to store the current guess
+    unsigned long long attempts = 0; // Counter for the number of attempts
+    unsigned long long total_combinations = 0; // Total combinations possible
+    clock_t start_time, end_time; // Variables to store start and end times
 
-    while (1) {
-        attempts++;
+    // Prompt the user to enter the target password and maximum length
+    get_input(target_password, sizeof(target_password), 
+              "                    \033[1;33mEnter the target password\033[0m", "lowercase letters only");
 
-        if (strcmp(guess, target_password) == 0) {
-            end_time = clock();
-            double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-            printf(GREEN "\nPassword cracked: %s\n" RESET, guess);
-            printf(GREEN "Total attempts: %d\n" RESET, attempts);
-            printf(GREEN "Time taken: %.2f seconds\n" RESET, time_taken);
-            break;
-        }
-
-        if (!increment_password(guess, max_length, charset, charset_size)) {
-            printf(RED "\nFailed to crack the password within the given parameters.\n" RESET);
-            break;
-        }
-
-        if (attempts % 100000 == 0) {
-            printf(YELLOW "Attempts: %d, Current guess: %s\r" RESET, attempts, guess);
-            fflush(stdout);
+    // Input validation: Ensure the target password contains only lowercase letters from the charset
+    for (int i = 0; i < strlen(target_password); i++) {
+        if (!islower(target_password[i])) {
+            printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+            printf("%s%*s|   %sERROR:%s Password must contain lowercase letters only.%s|\n", 
+                   ERROR, padding, "", BOLD, RESET, ERROR);
+            printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+            printf("\n%*sPress ENTER to return to menu...", padding, "");
+            getchar(); // Wait for user to press Enter
+            return; // Exit the function due to invalid input
         }
     }
-    log_action("Brute Force Attack Simulator executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
+
+    printf("\n%*s%sEnter the maximum password length to attempt (up to 20): %s", 
+           padding, "", CYAN, RESET);
+    if (scanf("%d", &max_length) != 1 || max_length <= 0 || max_length > 20) { // Validate input
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Invalid password length.                %s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        while (getchar() != '\n'); // Clear input buffer
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar(); // Wait for user to press Enter
+        return; // Exit the function due to invalid input
+    }
+    while (getchar() != '\n'); // Clear input buffer
+
+    // Ensure the target password length does not exceed max_length
+    if (strlen(target_password) > max_length) {
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Target password length exceeds max length.%s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar(); // Wait for user to press Enter
+        return;
+    }
+
+    // Compute total combinations incrementally
+    unsigned long long power = 1; // Store the current power of charset_size
+    for (int i = 1; i <= max_length; i++) {
+        power *= charset_size; // Calculate charset_size^i
+        total_combinations += power; // Add to total_combinations
+    }
+
+    printf("\n%*s%sINFO%s: Starting brute-force simulation...\n", padding, "", CYAN, RESET);
+    sleep(1); // Wait for 1 second before starting
+
+    guess[0] = charset[0]; // Initialize the first character of the guess
+    guess[1] = '\0'; // Null-terminate the guess string
+    start_time = clock(); // Record the start time
+
+    // Main brute force loop
+    while (1) {
+        attempts++; // Increment the attempts counter
+
+        // Check if the current guess matches the target password
+        if (strcmp(guess, target_password) == 0) {
+            end_time = clock(); // Record the end time
+            double time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC; // Calculate time taken
+            printf("\n%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+            printf("%s%*s|   %sSUCCESS:%s Password cracked: %s                 %s|\n", 
+                   GREEN, padding, "", BOLD, RESET, guess, GREEN);
+            printf("%s%*s|   %sSUCCESS:%s Total attempts: %llu            %s|\n", 
+                   GREEN, padding, "", BOLD, RESET, attempts, GREEN);
+            printf("%s%*s|   %sSUCCESS:%s Time taken: %.2f seconds             %s|\n", 
+                   GREEN, padding, "", BOLD, RESET, time_taken, GREEN);
+            printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+            printf("\n%*sPress ENTER to return to menu...", padding, "");
+            getchar(); // Wait for user to press Enter
+            break; // Exit the loop upon success
+        }
+
+        // Attempt to increment the guess
+        if (!increment_password(guess, max_length, charset, charset_size)) {
+            printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+            printf("%s%*s|   %sERROR:%s Failed to crack the password.          %s|\n", 
+                   ERROR, padding, "", BOLD, RESET, ERROR);
+            printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+            printf("\n%*sPress ENTER to return to menu...", padding, "");
+            getchar(); // Wait for user to press Enter
+            break; // Exit the loop upon failure
+        }
+
+        // Show progress percentage every 100,000 attempts
+        if (attempts % 100000 == 0) {
+            double progress_percentage = ((double)attempts / total_combinations) * 100;
+            if (progress_percentage > 100.0) progress_percentage = 100.0; // Cap at 100%
+            printf("\r%*s%sINFO%s: Progress: %.2f%%", padding, "", CYAN, RESET, progress_percentage);
+            fflush(stdout); // Ensure immediate display
+        }
+    }
+    printf("\n%*sPress ENTER to return to menu...", padding, "");
+    getchar(); // Wait for user to press Enter
 }
 
 // Tool 2: Basic File Encryption Tool (XOR Encryption)
 void file_encryption_tool() {
-    clear_screen();
-    printf(GREEN "Basic File Encryption Tool\n" RESET);
+    clear_screen(); // Clear the terminal screen
 
-    char input_file[100], output_file[100], key[100];
-    FILE *infile, *outfile;
-    unsigned char buffer;
-    int key_length, i = 0;
+    const int padding = 20; // Center alignment for the header and content
 
-    printf("Enter input file name: ");
-    scanf("%s", input_file);
-    printf("Enter output file name: ");
-    scanf("%s", output_file);
-    printf("Enter encryption key: ");
-    scanf("%s", key);
-
-    key_length = strlen(key);
-    infile = fopen(input_file, "rb");
-    outfile = fopen(output_file, "wb");
-
-    if (!infile || !outfile) {
-        printf(RED "Error: Could not open files.\n" RESET);
-        return;
-    }
-
-    while (fread(&buffer, 1, 1, infile)) {
-        buffer ^= key[i % key_length];  // XOR with key
-        fwrite(&buffer, 1, 1, outfile);
-        i++;
-    }
-
-    fclose(infile);
-    fclose(outfile);
-    printf(GREEN "File encryption completed.\n" RESET);
-    log_action("File Encryption Tool executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
-}
-
-// Tool: File Decryption Tool (XOR Decryption)
-void file_decryption_tool() {
-    clear_screen();
-    printf(GREEN "Basic File Decryption Tool\n" RESET);
-
-    char input_file[100], output_file[100], key[100];
-    FILE *infile, *outfile;
-    unsigned char buffer;
-    int key_length, i = 0;
-
-    printf("Enter encrypted file name: ");
-    scanf("%s", input_file);
-    printf("Enter output file name: ");
-    scanf("%s", output_file);
-    printf("Enter decryption key: ");
-    scanf("%s", key);
-
-    key_length = strlen(key);
-    infile = fopen(input_file, "rb");
-    outfile = fopen(output_file, "wb");
-
-    if (!infile || !outfile) {
-        printf(RED "Error: Could not open files.\n" RESET);
-        return;
-    }
-
-    while (fread(&buffer, 1, 1, infile)) {
-        buffer ^= key[i % key_length];  // XOR with key to decrypt
-        fwrite(&buffer, 1, 1, outfile);
-        i++;
-    }
-
-    fclose(infile);
-    fclose(outfile);
-    printf(GREEN "File decryption completed.\n" RESET);
-    log_action("File Decryption Tool executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
-}
-
-// Tool 3: Dictionary Attack Tool
-void dictionary_password_crack() {
-    clear_screen();
-    printf(GREEN "Dictionary Password Crack\n" RESET);
-}
-
-void loadingAnimation() {
-    printf(YELLOW "\n[INFO] Loading dictionary" RESET);
-    fflush(stdout);
-    for (int i = 0; i < 5; i++) {
-        printf(".");
-        fflush(stdout);
-        sleep(1);
-    }
+    // Header for the tool
     printf("\n");
-}
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+    printf("%s%*s|     %sBasic File Encryption Tool%s                   %s|\n", 
+           CYAN, padding, "", BOLD, RESET, CYAN);
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
 
-void dictionary_attack_tool() {
-    char enteredPassword[MAX_WORD_LENGTH];
-    char word[MAX_WORD_LENGTH];
-    FILE *file;
-    
-    // Print welcome banner
-    dictionary_password_crack();
-    
-    // Prompt user to enter a password
-    printf(CYAN BOLD "\nEnter the password you want to crack: " RESET);
-    scanf("%s", enteredPassword);
-    
-    // Simulate loading process
-    loadingAnimation();
-    
-    // Open the dictionary file
-    file = fopen("dictionary.txt", "r");
-    if (file == NULL) {
-        printf(RED BOLD "\nError: Could not open dictionary file.\n" RESET);
+    char input_file[100], output_file[100], key[100]; // Buffers for filenames and encryption key
+    FILE *infile, *outfile; // File pointers for input and output files
+    unsigned char buffer; // Buffer to store file data
+    int key_length, i = 0; // Variables for key length and iteration
+
+    // Prompt the user to enter input file name, output file name, and encryption key
+    get_input(input_file, sizeof(input_file), "                     \033[1;33mEnter input file name\033[0m", "e.g., input.txt");
+    get_input(output_file, sizeof(output_file), "                     \033[1;33mEnter output file name\033[0m", "e.g., encrypted.bin");
+    get_input(key, sizeof(key), "                     \033[1;33mEnter encryption key\033[0m", "e.g., mykey");
+
+    // Input validation: Ensure the key is not empty
+    if (strlen(key) == 0) {
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Encryption key cannot be empty.        %s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar(); // Wait for user to press Enter
         return;
     }
 
-    // Search through dictionary
-    printf(CYAN BOLD "\n[INFO] Searching for the password...\n\n" RESET);
-    sleep(1);  // Simulating search time
+    key_length = strlen(key); // Calculate the length of the encryption key
+    infile = fopen(input_file, "rb"); // Open the input file in binary read mode
+    outfile = fopen(output_file, "wb"); // Open the output file in binary write mode
 
-    while (fgets(word, sizeof(word), file) != NULL) {
-        // Remove newline character from the word, if any
-        word[strcspn(word, "\n")] = '\0';
-
-        // Compare entered password with dictionary words
-        if (strcmp(enteredPassword, word) == 0) {
-            printf(GREEN BOLD "\n[SUCCESS] Password found: " RESET UNDERLINE "%s\n" RESET, word);
-            fclose(file);getch();
-            return;
-        }
-
-        // Displaying each checked word (for user excitement)
-        printf(YELLOW "[CHECKING] " RESET "Attempting: %s\n", word);
-        sleep(1);  // Simulating delay for more realism
+    if (!infile || !outfile) { // Check if files were opened successfully
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Could not open files.                 %s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        if (infile) fclose(infile);
+        if (outfile) fclose(outfile);
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar(); // Wait for user to press Enter
+        return; // Exit the function due to error
     }
 
-    // If no password match is found
-    printf(RED BOLD "\n[FAILURE] Password not found in the dictionary.\n" RESET);
+    printf("\n%*s%sINFO%s: Encrypting file...\n", padding, "", CYAN, RESET);
+    while (fread(&buffer, 1, 1, infile)) { // Read one byte at a time from the input file
+        buffer ^= key[i % key_length];  // XOR the byte with the key character
+        fwrite(&buffer, 1, 1, outfile); // Write the encrypted byte to the output file
+        i++; // Increment the counter
+    }
 
-    fclose(file);
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
+    printf("\n%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+    printf("%s%*s|   %sSUCCESS:%s File encryption completed.            %s|\n", 
+           GREEN, padding, "", BOLD, RESET, GREEN);
+    printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+
+    fclose(infile); // Close the input file
+    fclose(outfile); // Close the output file
+    printf("\n%*sPress ENTER to return to menu...", padding, "");
+    getchar(); // Wait for user to press Enter
+}
+
+// Tool 3: Basic File Decryption Tool (XOR Decryption)
+void file_decryption_tool() {
+    clear_screen(); // Clear the terminal screen
+
+    const int padding = 20; // Center alignment for the header and content
+
+    // Header for the tool
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+    printf("%s%*s|     %sBasic File Decryption Tool%s                   %s|\n", 
+           CYAN, padding, "", BOLD, RESET, CYAN);
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+
+    char input_file[100], output_file[100], key[100]; // Buffers for filenames and decryption key
+    FILE *infile, *outfile; // File pointers for input and output files
+    unsigned char buffer; // Buffer to store file data
+    int key_length, i = 0; // Variables for key length and iteration
+
+    // Prompt the user to enter encrypted file name, output file name, and decryption key
+    get_input(input_file, sizeof(input_file), "                     \033[1;33mEnter encrypted file name\033[0m", "e.g., encrypted.bin");
+    get_input(output_file, sizeof(output_file), "                     \033[1;33mEnter output file name\033[0m", "e.g., decrypted.txt");
+    get_input(key, sizeof(key), "                     \033[1;33mEnter decryption key\033[0m", "e.g., mykey");
+
+    // Input validation: Ensure the key is not empty
+    if (strlen(key) == 0) {
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Decryption key cannot be empty.        %s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar(); // Wait for user to press Enter
+        return;
+    }
+
+    key_length = strlen(key); // Calculate the length of the decryption key
+    infile = fopen(input_file, "rb"); // Open the encrypted file in binary read mode
+    outfile = fopen(output_file, "wb"); // Open the output file in binary write mode
+
+    if (!infile || !outfile) { // Check if files were opened successfully
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Could not open files.                 %s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        if (infile) fclose(infile);
+        if (outfile) fclose(outfile);
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar(); // Wait for user to press Enter
+        return; // Exit the function due to error
+    }
+
+    printf("\n%*s%sINFO%s: Decrypting file...\n", padding, "", CYAN, RESET);
+    while (fread(&buffer, 1, 1, infile)) { // Read one byte at a time from the encrypted file
+        buffer ^= key[i % key_length];  // XOR the byte with the key character to decrypt
+        fwrite(&buffer, 1, 1, outfile); // Write the decrypted byte to the output file
+        i++; // Increment the counter
+    }
+
+    printf("\n%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+    printf("%s%*s|   %sSUCCESS:%s File decryption completed.            %s|\n", 
+           GREEN, padding, "", BOLD, RESET, GREEN);
+    printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+
+    fclose(infile); // Close the encrypted file
+    fclose(outfile); // Close the output file
+    printf("\n%*sPress ENTER to return to menu...", padding, "");
+    getchar(); // Wait for user to press Enter
 }
 
 // Tool 4: Password Generator
 void password_generator() {
-    clear_screen();
-    printf(GREEN "Password Generator\n" RESET);
+    clear_screen(); // Clear the terminal screen
 
-    char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-    int length, charset_size = strlen(charset);
-    char password[100];
+    const int padding = 20; // Center alignment for the header and content
 
-    printf("Enter the desired password length: ");
-    scanf("%d", &length);
+    // Header for the tool
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+    printf("%s%*s|     %sPassword Generator%s                        %s|\n", 
+           CYAN, padding, "", BOLD, RESET, CYAN);
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
 
-    srand(time(NULL));
-    for (int i = 0; i < length; i++) {
-        password[i] = charset[rand() % charset_size];
+    char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"; // Character set for password generation
+    int length, charset_size = strlen(charset); // Variables for password length and charset size
+    char password[100]; // Buffer to store the generated password
+
+    // Prompt the user to enter the desired password length
+    printf("\n%*s%sEnter the desired password length (8-64):%s ", padding, "", CYAN, RESET);
+    if (scanf("%d", &length) != 1 || length < 8 || length > 64 || length >= sizeof(password)) { // Validate input
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Invalid password length.                %s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        while (getchar() != '\n'); // Clear input buffer
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar(); // Wait for user to press Enter
+        return; // Exit the function due to invalid input
     }
-    password[length] = '\0';
+    while (getchar() != '\n'); // Clear input buffer
 
-    printf(GREEN "Generated password: %s\n" RESET, password);
-    log_action("Password Generator executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
+    srand(time(NULL)); // Seed the random number generator with current time
+    for (int i = 0; i < length; i++) { // Loop to generate each character of the password
+        password[i] = charset[rand() % charset_size]; // Select a random character from the charset
+    }
+    password[length] = '\0'; // Null-terminate the password string
+
+    printf("\n%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+    printf("%s%*s|   %sSUCCESS:%s Generated password:                  %s|\n", 
+           GREEN, padding, "", BOLD, RESET, GREEN);
+    printf("%s%*s|   %s%-48s%s|\n", GREEN, padding, "", password, GREEN);
+    printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+
+    // Feature: Prompt user to save the password
+    printf("\n%*sWould you like to save this password to a file? (y/n): ", padding, "");
+    char save_choice[10];
+    if (fgets(save_choice, sizeof(save_choice), stdin) && tolower(save_choice[0]) == 'y') {
+        FILE *file = fopen("generated_passwords.txt", "a");
+        if (file) {
+            fprintf(file, "Generated Password: %s\n", password);
+            fclose(file);
+            printf("\n%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+            printf("%s%*s|   %sSUCCESS:%s Password saved to 'generated_passwords.txt'. %s|\n", 
+                   GREEN, padding, "", BOLD, RESET, GREEN);
+            printf("%s%*s+--------------------------------------------------+\n", GREEN, padding, "");
+        } else {
+            printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+            printf("%s%*s|   %sERROR:%s Unable to save the password.          %s|\n", 
+                   ERROR, padding, "", BOLD, RESET, ERROR);
+            printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        }
+    }
+
+    printf("\n%*sPress ENTER to return to menu...", padding, "");
+    getchar(); // Wait for user to press Enter
 }
 
 // Tool 5: Password Strength Checker
 void password_strength_checker() {
-    clear_screen();
-    printf(GREEN "Password Strength Checker\n" RESET);
+    clear_screen(); // Clear the terminal screen
 
-    char password[100];
-    int length, has_upper = 0, has_lower = 0, has_digit = 0, has_special = 0;
+    const int padding = 20; // Center alignment for the header and content
 
-    printf("Enter password to check strength: ");
-    scanf("%s", password);
+    // Header for the tool
+    printf("\n");
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
+    printf("%s%*s|     %sPassword Strength Checker%s                  %s|\n", 
+           CYAN, padding, "", BOLD, RESET, CYAN);
+    printf("%s%*s+--------------------------------------------------+\n", CYAN, padding, "");
 
-    length = strlen(password);
-    for (int i = 0; i < length; i++) {
-        if (password[i] >= 'A' && password[i] <= 'Z') has_upper = 1;
-        if (password[i] >= 'a' && password[i] <= 'z') has_lower = 1;
-        if (password[i] >= '0' && password[i] <= '9') has_digit = 1;
-        if (strchr("!@#$%^&*()", password[i])) has_special = 1;
-    }
+    char password[100]; // Buffer to store the password to check
+    int length, has_upper = 0, has_lower = 0, has_digit = 0, has_special = 0; // Variables to check password strength criteria
 
-    printf(GREEN "Password Strength: " RESET);
-    if (length >= 8 && has_upper && has_lower && has_digit && has_special)
-        printf(GREEN "Strong\n" RESET);
-    else if (length >= 6 && ((has_upper && has_lower) || (has_digit && has_special)))
-        printf(YELLOW "Moderate\n" RESET);
-    else
-        printf(RED "Weak\n" RESET);
+    // Prompt the user to enter the password to check
+    get_input(password, sizeof(password), "                     \033[1;33mEnter your password\033[0m", "");
 
-    log_action("Password Strength Checker executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
-}
+    length = strlen(password); // Calculate the length of the password
 
-// Tool 6: HexSecure - Secure Your Files with Signature-Based Detection
-char* read_file_as_hex(const char* filepath) {
-    FILE *file = fopen(filepath, "rb");
-    if (!file) {
-        printf(RED "Unable to open file %s\n" RESET);
-        return NULL;
-    }
-
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    char *buffer = (char*)malloc(length);
-    fread(buffer, 1, length, file);
-    fclose(file);
-
-    char *hex_string = (char*)malloc(2 * length + 1);
-    for (long i = 0; i < length; i++) {
-        sprintf(&hex_string[i * 2], "%02X", (unsigned char)buffer[i]);
-    }
-    hex_string[2 * length] = '\0';
-    free(buffer);
-
-    return hex_string;
-}
-
-int check_for_virus(const char* hex_string, const char* signature) {
-    return (strstr(hex_string, signature) != NULL);
-}
-
-void scan_file(const char* filepath, const char* signature_file) {
-    char *file_hex = read_file_as_hex(filepath);
-    if (!file_hex) {
+    // Input validation: Ensure password is not empty
+    if (length == 0) {
+        printf("\n%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("%s%*s|   %sERROR:%s Password cannot be empty.               %s|\n", 
+               ERROR, padding, "", BOLD, RESET, ERROR);
+        printf("%s%*s+--------------------------------------------------+\n", ERROR, padding, "");
+        printf("\n%*sPress ENTER to return to menu...", padding, "");
+        getchar();
         return;
     }
 
-    FILE *sig_file = fopen(signature_file, "r");
-    if (!sig_file) {
-        printf(RED "Unable to open signature file\n" RESET);
-        free(file_hex);
-        return;
+    for (int i = 0; i < length; i++) { // Loop through each character to check criteria
+        if (isupper((unsigned char)password[i])) has_upper = 1; // Check for uppercase letters
+        else if (islower((unsigned char)password[i])) has_lower = 1; // Check for lowercase letters
+        else if (isdigit((unsigned char)password[i])) has_digit = 1; // Check for digits
+        else if (ispunct((unsigned char)password[i])) has_special = 1; // Check for special characters
     }
 
-    char line[256];
-    int virus_found = 0;
+    // Inform the user about the password strength
+    printf("\n%*s%sPassword Strength:%s ", padding, "", GREEN, RESET);
+    if (length >= 8 && has_upper && has_lower && has_digit && has_special) {
+        printf("%sStrong%s\n", GREEN, RESET); // Strong password
+    } else if (length >= 6 && ((has_upper && has_lower) || (has_digit && has_special))) {
+        printf("%sModerate%s\n", YELLOW, RESET); // Moderate password
+    } else {
+        printf("%sWeak%s\n", RED, RESET); // Weak password
+    }
 
-    while (fgets(line, sizeof(line), sig_file)) {
-        line[strcspn(line, "\n")] = 0;
+    // Additional feature: Suggest improvements for weak or moderate passwords
+    if (length < 8 || !has_upper || !has_lower || !has_digit || !has_special) {
+        printf("\n%*s%sSuggestions to improve your password:%s\n", padding, "", CYAN, RESET);
+        if (length < 8) printf("%*s- Increase the password length to at least 8 characters.\n", padding, "");
+        if (!has_upper) printf("%*s- Include at least one uppercase letter (A-Z).\n", padding, "");
+        if (!has_lower) printf("%*s- Include at least one lowercase letter (a-z).\n", padding, "");
+        if (!has_digit) printf("%*s- Include at least one digit (0-9).\n", padding, "");
+        if (!has_special) printf("%*s- Include at least one special character (!@#$%%^&*).\n", padding, "");
+    }
 
-        char *virus_name = strtok(line, ":");
-        char *signature = strtok(NULL, ":");
+    printf("\n%*sPress ENTER to return to menu...", padding, "");
+    getchar(); // Wait for user to press Enter
+}
 
-        if (check_for_virus(file_hex, signature)) {
-            printf(RED "Virus detected: %s\n" RESET, virus_name);
-            virus_found = 1;
+// Function to display the tools menu with descriptions
+void display_tools_menu() {
+    clear_screen(); // Clear the terminal screen
+    display_banner(); // Display the ASCII art banner
+
+    // Decorative header
+    printf("\n\n");
+    printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+    printf("%s%*s| %s%sSelect a Tool to Use%s                        %s|\n", CYAN, 20, "", BOLD, CYAN, RESET, CYAN);
+    printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+
+    // Menu options with descriptions
+    printf("%s%*s| %-44s|\n", CYAN, 20, "", "Tool Description");
+    printf("%*s+--------------------------------------------------------------------------+\n", 20, "");
+    printf("%*s| %s1.%s  Brute Force Attack Simulator        - Simulate brute-force attacks   %s|\n", 
+           20, "", CYAN, RESET, CYAN);
+    printf("%*s| %s2.%s  Basic File Encryption Tool          - Encrypt files using XOR        %s|\n", 
+           20, "", CYAN, RESET, CYAN);
+    printf("%*s| %s3.%s  Basic File Decryption Tool          - Decrypt files using XOR        %s|\n", 
+           20, "", CYAN, RESET, CYAN);
+    printf("%*s| %s4.%s  Password Generator                  - Generate strong passwords      %s|\n", 
+           20, "", CYAN, RESET, CYAN);
+    printf("%*s| %s5.%s  Password Strength Checker           - Check the strength of passwords%s|\n", 
+           20, "", CYAN, RESET, CYAN);
+    printf("%*s| %s6.%s  Help                                - View help instructions         %s|\n", 
+           20, "", CYAN, RESET, CYAN);
+    printf("%*s| %s7.%s  Exit                                - Exit the program               %s|\n", 
+           20, "", CYAN, RESET, CYAN);
+    printf("%*s+--------------------------------------------------------------------------+\n", 20, "");
+
+    // Footer with instructions
+    printf("%s%*s| %sEnter the corresponding number to proceed.%s  %s|\n", 
+           CYAN, 20, "", BOLD, RESET, CYAN);
+    printf("%s%*s+---------------------------------------------+\n", CYAN, 20, "");
+    printf("%s", RESET); // Reset text attributes
+}
+
+// Function to handle user selection and execute the corresponding tool
+void handle_choice(int choice) {
+    switch (choice) { // Switch-case to handle different tool selections
+        case 1:
+            brute_force_simulator(); // Execute Brute Force Attack Simulator
             break;
-        }
+        case 2:
+            file_encryption_tool(); // Execute Basic File Encryption Tool
+            break;
+        case 3:
+            file_decryption_tool(); // Execute Basic File Decryption Tool
+            break;
+        case 4:
+            password_generator(); // Execute Password Generator
+            break;
+        case 5:
+            password_strength_checker(); // Execute Password Strength Checker
+            break;
+        case 6:
+            display_help(); // Display the help section
+            break;
+        case 7:
+            user_exit(); // Exit the program
+            break;
+        default:
+            // Handle invalid menu choices
+            printf("%s%sERROR%s: Invalid choice! Please choose a valid tool.\n", ERROR, BOLD, RESET);
+            sleep(1); // Wait for 1 second before returning to menu
     }
-
-    if (!virus_found) {
-        printf(GREEN "No viruses found in the file.\n" RESET);
-    }
-
-    fclose(sig_file);
-    free(file_hex);
 }
 
-void hexsecure() {
-    clear_screen();
-    printf(GREEN "HexSecure: Secure Your Files\n" RESET);
-
-    char file_to_scan[100], signature_file[100];
-    printf("Enter the file to scan: ");
-    scanf("%s", file_to_scan);
-    printf("Enter the signature file (database): ");
-    scanf("%s", signature_file);
-
-    scan_file(file_to_scan, signature_file);
-
-    log_action("HexSecure: Secure Your Files executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
-}
-
-// Tool 7: Secure File Eraser (Shredder)
-void secure_file_eraser() {
-    clear_screen();
-    printf(GREEN "Secure File Eraser (Shredder)\n" RESET);
-
-    char file_to_erase[100];
-    printf("Enter the file to securely erase: ");
-    scanf("%s", file_to_erase);
-
-    FILE *file = fopen(file_to_erase, "wb");
-    if (!file) {
-        printf(RED "Error: Unable to open file for erasing.\n" RESET);
-        return;
-    }
-
-    // Overwrite file with random data multiple times
-    for (int pass = 0; pass < 3; pass++) {
-        fseek(file, 0, SEEK_SET);
-        for (int i = 0; i < 1000; i++) {  // Simulated overwrite
-            char random_data = rand() % 256;
-            fwrite(&random_data, sizeof(char), 1, file);
-        }
-    }
-
-    fclose(file);
-    remove(file_to_erase);
-    printf(GREEN "File erased securely.\n" RESET);
-
-    log_action("Secure File Eraser (Shredder) executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
-}
-
-// Tool 8: Binary File Creator (Virus Creator)
-void binary_file_creator() {
-    clear_screen();
-    printf(GREEN "Binary File Creator (Virus Creator)\n" RESET);
-
-    FILE *file = fopen("testfile.exe", "wb");
-
-    if (!file) {
-        printf(RED "Error: Unable to create file.\n" RESET);
-        return;
-    }
-
-    unsigned char virus_signature[] = { 0xBA, 0xDC, 0x0F, 0xFE, 0xE0, 0xDD, 0xF0, 0x0D };
-
-    fwrite(virus_signature, sizeof(virus_signature), 1, file);
-    fclose(file);
-
-    printf(GREEN "File created successfully.\n" RESET);
-    log_action("Binary File Creator (Virus Creator) executed");
-    printf("\nPress enter to return to menu...");
-    getchar(); getchar();
-}
-
+// Main function: Entry point of the program
 int main() {
-    display_intro();  // Show introduction with group and university info
-    login_system();
+    load_settings(); // Load settings (theme-related settings removed)
 
+    display_intro(); // Display introductory information
+
+    login_system(); // Handle user login
+
+    // Infinite loop to continuously display the tools menu and handle user selections
     while (1) {
-        display_tools_menu();
-        int choice;
-        scanf("%d", &choice);
-
-        switch (choice) {
-            case 1:
-                brute_force_simulator();
-                break;
-            case 2:
-                file_encryption_tool();
-                break;
-            case 3:
-                file_decryption_tool();
-                break;
-            case 4:
-                dictionary_attack_tool();  // Call the new Dictionary Attack Tool here
-                break;
-            case 5:
-                password_generator();
-                break;
-            case 6:
-                password_strength_checker();
-                break;
-            case 7:
-                hexsecure();
-                break;
-            case 8:
-                secure_file_eraser();
-                break;
-            case 9:
-                binary_file_creator();
-                break;
-            case 10:
-                printf(GREEN "\nExiting program. Goodbye!\n" RESET);
-                log_action("Program exited");
-                exit(0);
-                break;
-            default:
-                printf(RED "Invalid choice! Please choose a valid tool.\n" RESET);
-                log_action("Invalid tool choice");
-        }
+        display_tools_menu(); // Display the tools menu
+        int choice = get_valid_choice(1, 7); // Get a valid choice from the user within the range 1-7
+        handle_choice(choice); // Execute the corresponding tool based on user choice
     }
 
-    return 0;
+    return 0; // Return 0 to indicate successful program termination
 }
